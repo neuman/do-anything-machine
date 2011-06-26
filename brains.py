@@ -171,6 +171,35 @@ class EightQueensProblem(problem):
     crossoverRate = 0.05
     
     population = None
+    
+    def energy(self, model):
+        """
+        return the number of collisions 
+        """
+        #print self
+        #return 10
+        collisions = 0
+        counted = []
+        #print self[0]
+        sorter = [self[name] for name in organismNames]
+        r = 0
+        for n in sorter:
+            i = 0
+            #check for collisions in the same row
+            if sorter.count(n) > 1:
+                collisions += (sorter.count(n) -1)
+            #check for diagonal collisions
+            d = 1
+            for w in sorter.__getslice__(r+1,8):
+                if w == n + d:
+                    collisions +=1
+                if w == n - d:
+                    collisions +=1
+                d += 1
+            r += 1
+            
+
+        return collisions
 
     #there should be one of these generated for every unique gene_space column 
     def create_gene_class(self, new_randMin, new_randMax, new_mutProb, new_mutAmt):
@@ -252,6 +281,21 @@ class EightQueensProblem(problem):
     genome = {}
     for name in organismNames:
         genome[name] = organismLocationGene
+        
+    #there should be one of these generated for every unique gene_space column 
+    def create_solution_class(self, new_randMin, new_randMax, new_mutProb, new_mutAmt):
+        class newClass(BaseGeneClass):
+            """
+            Each gene in the EQP solver represents the location
+            of one queen on the board
+            """
+            randMin = new_randMin
+            randMax = new_randMax
+            
+            mutProb = new_mutProb
+            mutAmt = new_mutAmt
+
+        return newClass
 
     class EQPSolution(OrganismClass):
         """
