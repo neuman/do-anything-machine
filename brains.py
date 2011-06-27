@@ -1,5 +1,5 @@
 from pygraph.classes.graph import graph
-import random
+import random, math
 
 def random_string(length):
     import random
@@ -11,6 +11,7 @@ class Problem(object):
     
     def __init__(self, model):
         "heres the model and we don't know anything about it.  That's the problem"
+        self.model = model
         
         
     def solve(self):
@@ -23,15 +24,13 @@ class Problem(object):
                 self.cycle()
         except KeyboardInterrupt:
             pass
+            
+        print self.model.__str__()
 
 class Model(object):
     "an instance of this is one state of the model, also known as a solution"
     
     def get_genes(self):
-        "returns an array of integers"
-        return []
-        
-    def load_genes(self, genes):
         "returns an array of integers"
         return []
         
@@ -49,6 +48,9 @@ class Model(object):
     def determine_energy(self, model):
         "evaluates the state and returns some numerical score"
         pass
+        
+    def __str__(self):
+        return "Some Model Should Be Printing Here"
         
 class Representation(object):
     name = None
@@ -188,7 +190,7 @@ class EightQueensModel(Model):
         for i in range(self.size):
             IntermediateEASum = -1.0;
             for k in range(self.size):
-                IntermediateEASum += self.state[i,k];  
+                IntermediateEASum += self.state[i][k];  
             EASum += math.pow(IntermediateEASum, 2);        
         #Count number in each column
         EBSum = 0.0;
@@ -219,6 +221,13 @@ class EightQueensModel(Model):
         math.pow(EESum - self.size,2);
          # calculate E
         E = 0.5 * (EASum + EBSum + ECSum + EDSum + EESum);
+        return E
+        
+    def load_state(self, state):
+        self.state = state
+        
+    def __str__(self):
+        return self.state.__str__()
 
                                  
 
@@ -260,6 +269,8 @@ class EightQueensProblem(Problem):
     
     population = None
     
+    organismNames = []
+    
 
 
     #there should be one of these generated for every unique gene_space column 
@@ -279,48 +290,10 @@ class EightQueensProblem(Problem):
     
     
 
-    '''
-   #pretty sure i don't need this anymore, replaced by a graph traverser
-    class Queen:
-        """
-        represents a city by name and location,
-        and calculates distance from another city
-        """
-        def __init__(self, name, x=None, y=None):
-            """
-            Create city by name, randomly generating
-            its co-ordinates if none given
-            """
-            self.name = name
-
-            # constrain city coords so they're no closer than 50 pixels
-            # to any edge, so the city names show up ok in the gui version        
-            if x == None:
-                x = random() * (width - 100) + 50
-            if y == None:
-                y = random() * (height - 100) + 50
-                
-            self.x = x
-            self.y = y
-        
-        def __sub__(self, other):
-            """
-            compute distance between this and another city
-            """
-            dx = self.x - other.x
-            dy = self.y - other.y
-            return sqrt(dx * dx + dy * dy)
-
-        def __repr__(self):
-            return ""
-    '''
-
-
-
-
-        
+       
     #there should be one of these generated for every unique gene_space column 
     def create_solution_class(self, new_genome, new_mutateOneOnly, new_crossoverRate, new_numMutants):
+        this_problem = self
         class newSolutionClass(self.OrganismClass):
             """
             Organism which represents a solution to
@@ -334,41 +307,27 @@ class EightQueensProblem(Problem):
 
             numMutants = new_numMutants
             
+            problem = this_problem
+            
             #fitness = new_fitnessFunction
             
             
-        def fitnessz(self):
-            print self
-            return 5
-            
-        def fitness(self):
-            """
-            return the number of collisions 
-            """
-            #print self
-            #return 10
-            collisions = 0
-            counted = []
-            #print self[0]
-            sorter = [self[name] for name in queenNames]
-            r = 0
-            for n in sorter:
-                i = 0
-                #check for collisions in the same row
-                if sorter.count(n) > 1:
-                    collisions += (sorter.count(n) -1)
-                #check for diagonal collisions
-                d = 1
-                for w in sorter.__getslice__(r+1,8):
-                    if w == n + d:
-                        collisions +=1
-                    if w == n - d:
-                        collisions +=1
-                    d += 1
-                r += 1
                 
+            def fitness(self):
+                self.problem.model.load_state(self.getValues())
+                return self.problem.model.determine_energy()
 
-            return collisions
+                
+            def getValues(self):
+                old_array =  [self[name] for name in self.problem.organismNames]
+                new_array = []
+                for a in old_array:
+                    #create a row with a queen in the appropriate location
+                    temp_array = [0]*self.problem.numorganisms
+                    temp_array[a] = 1
+                    new_array.append(temp_array)
+                return new_array
+                    
         return newSolutionClass
 
                 
@@ -408,7 +367,7 @@ class EightQueensProblem(Problem):
             organisms.append(GraphTraverser("%s" % i))
 
         #extract the organism names into an array
-        organismNames = [organism.name for organism in organisms]
+        self.organismNames = [organism.name for organism in organisms]
 
         #count the number of organisms
         organismCount = len(organisms)
@@ -425,20 +384,20 @@ class EightQueensProblem(Problem):
             priNormal.append(((i+0.25)*priInterval, (i+0.75)*priInterval))
 
         self.genome = {}
-        for name in organismNames:
+        for name in self.organismNames:
             self.genome[name] = self.create_gene_class(self.geneRandMin, self.geneRandMax, self.geneMutProb, self.geneMutAmt)
             
         solutionClass = self.create_solution_class(self.genome, self.mutateOneOnly, self.crossoverRate, self.popNumMutants)
         populationClass = self.create_population_class(self.popInitSize, solutionClass, self.popChildCull, self.popChildCount, self.popIncest, self.popNumMutants, self.popNumRandomOrganisms, self.mutateAfterMating)
         self.population = populationClass()
-        print "self.population.species: "+type(self.population.species).__name__
-        species_instance = self.population.species()
-        species_instance.fitness()
+        #print "self.population.species: "+type(self.population.species).__name__
+        #species_instance = self.population.species()
+        #species_instance.fitness()
         
     def cycle(self):
-        print "self.population: "+type(self.population).__name__
+       #print "self.population: "+type(self.population).__name__
         print "best=%s avg=%s" % (self.population.best().fitness(), self.population.fitness())
-        population.gen()
+        self.population.gen()
     
 def run_eight_queens():
     m = EightQueensModel()
