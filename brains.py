@@ -6,14 +6,7 @@ class Problem(object):
     
     def __init__(self, model):
         "heres the model and we don't know anything about it.  That's the problem"
-        `
-
-    def determine_valid(self, model):
-        "determines whether or not the state passes all requirements and returns True or False"
-
-    def determine_fitness(self, model):
-        "evaluates the state and returns some numerical score"
-        pass
+        
         
     def solve(self):
         "run the cycle function until something passes validation"
@@ -25,12 +18,23 @@ class Model(object):
         "returns an array of integers"
         return []
         
+    def load_genes(self, genes):
+        "returns an array of integers"
+        return []
+        
     def get_geneSpace(self):
         "returns an array of arrays where each column represents one gene and all of its possible values"
         return [[]]
         
     def randomize(self)
         "set current state to a random one"
+        pass
+        
+    def determine_valid(self, model):
+        "determines whether or not the state passes all requirements and returns True or False"
+
+    def determine_energy(self, model):
+        "evaluates the state and returns some numerical score"
         pass
 
     
@@ -131,17 +135,27 @@ class GeneticAlgorithm(algorithm):
 #begin code for the 8 queens problem
 class EightQueensModel(model):
     #the current arrangement
-    state = [0,0,0,0,0,0,0,0]
-    
-    #the total sum of all possible arrangements
-    space[[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7]]
+    state = [
+                [0,0,0,0,0,0,0,0], 
+                [0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0]
+                ]
     
     def randomize(self):
+        new_states = []
         new_state = []
-        for q in state:
-            random.seed()
-            new_state.append(random.randrange(0,7)
-        state = new_state
+        for q in self.state:
+            for s in q:
+                random.seed()
+                new_state.append(random.randrange(0,7)
+        new_states.append(new_state)
+        
+        self.state = new_states
         
 class EightQueensProblem(problem):
         
@@ -283,8 +297,8 @@ class EightQueensProblem(problem):
         genome[name] = organismLocationGene
         
     #there should be one of these generated for every unique gene_space column 
-    def create_solution_class(self, new_randMin, new_randMax, new_mutProb, new_mutAmt):
-        class newClass(BaseGeneClass):
+    def create_solution_class(self, genome, mutateOneOnly, crossoverRate, numMutants, fitnessFunction):
+        class newSolutionClass(OrganismClass):
             """
             Each gene in the EQP solver represents the location
             of one queen on the board
@@ -294,51 +308,7 @@ class EightQueensProblem(problem):
             
             mutProb = new_mutProb
             mutAmt = new_mutAmt
-
-        return newClass
-
-    class EQPSolution(OrganismClass):
-        """
-        Organism which represents a solution to
-        the EQP
-        """
-        genome = genome
-        
-        mutateOneOnly = mutateOneOnly
-
-        crossoverRate = crossoverRate
-
-        numMutants = 0.3
-
-        def fitness(self):
-            """
-            return the number of collisions 
-            """
-            #print self
-            #return 10
-            collisions = 0
-            counted = []
-            #print self[0]
-            sorter = [self[name] for name in organismNames]
-            r = 0
-            for n in sorter:
-                i = 0
-                #check for collisions in the same row
-                if sorter.count(n) > 1:
-                    collisions += (sorter.count(n) -1)
-                #check for diagonal collisions
-                d = 1
-                for w in sorter.__getslice__(r+1,8):
-                    if w == n + d:
-                        collisions +=1
-                    if w == n - d:
-                        collisions +=1
-                    d += 1
-                r += 1
-                
-
-            return collisions
-
+            
         def getCitiesInOrder(self):
             """
             return a list of the cities, sorted in order
@@ -362,16 +332,8 @@ class EightQueensProblem(problem):
         def getorganisms(self):
             return [self[name] for name in organismNames]
 
+        return newSolutionClass
 
-        #def normalise(self):
-            """
-            modifies the genes to a reasonably even spacing
-            """
-            #genes = self.genes
-            #for i in xrange(2):
-            #    sorter = [(genes[name][i], name) for name in cityNames]
-            #    sorter.sort()
-            #    sortedGenes = [tup[1] for tup in sorter]
                 
                 
 
