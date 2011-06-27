@@ -145,6 +145,7 @@ class EightQueensModel(model):
                 [0,0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0,0]
                 ]
+    size = len(state);
     
     def randomize(self):
         new_states = []
@@ -156,6 +157,48 @@ class EightQueensModel(model):
         new_states.append(new_state)
         
         self.state = new_states
+
+    def determine_energy(self):
+        #The 8Q energy function is 0 when we have a solution                                 
+        #Count number in each row
+        EASum = 0.0;
+        for i in range(self.size):
+            IntermediateEASum = -1.0;
+            for k in range(self.size):
+                IntermediateEASum += self.state[i,k];  
+            EASum += math.pow(IntermediateEASum, 2);        
+        #Count number in each column
+        EBSum = 0.0;
+        for i in range(self.size):
+            IntermediateEBSum = -1.0;
+            for k in range(self.size):
+                IntermediateEBSum += self.state[k,j];
+            EBSum += math.pow(IntermediateEBSum, 2);        
+        #Count number in each diagonal (rising)
+        ECSum = 0.0;
+        for i in range(self.size):
+            for j in range(self.size):
+                for k in range(1,self.size):
+                    if ((i + k < self.size) and (j + k < self.size)):
+                        ECSum += self.state[i+k,j+k] * self.state[i,j];                
+        #Count number in each diagonal (falling)
+        EDSum = 0.0;
+        for i in range(self.size):
+            for j in range(self.size):
+                for k in range(1,self.size):
+                   if ((i + k < self.size) and (j - k >= 0)):
+                        EDSum += self.V[i+k,j-k] * self.V[i,j];
+        #Count total number of queens                         
+        EESum = 0.0
+        for i in range(self.size):
+            for j in range(self.size):
+                EESum += self.V[i,j];
+        math.pow(EESum - self.size,2);
+         # calculate E
+        E = 0.5 * (EASum + EBSum + ECSum + EDSum + EESum);
+
+                                 
+
         
 class EightQueensProblem(problem):
         
