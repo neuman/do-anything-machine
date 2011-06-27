@@ -1,4 +1,5 @@
 from pygraph.classes.graph import graph
+from utilitybelt import random_string
 
 class Problem(object):
     data = {}
@@ -61,9 +62,12 @@ class GraphTraverser(representation)
         
     
     
-    def __init__(self):
+    def __init__(self, name=None):
         #make the graph variable an actual object
-        graph = graph()
+        if name!= None:
+            self.name = name
+        else:
+            self.name = random_string(15)
     
 class OperationList(representation):
     "some mathematical graph object we'll probably steal"
@@ -186,6 +190,8 @@ class EightQueensProblem(problem):
     
     population = None
     
+
+    
     def energy(self, model):
         """
         return the number of collisions 
@@ -270,101 +276,89 @@ class EightQueensProblem(problem):
 
 
 
-    #create an array of organisms
-    organisms = []
-    for i in xrange(numorganisms):
-        organisms.append(organism("%s" % i))
 
-    #extract the organism names into an array
-    organismNames = [organism.name for organism in organisms]
-
-    #count the number of organisms
-    organismCount = len(organisms)
-
-    #organize the organisms into a dict with names as keys
-    organismDict = {}
-    for organism in organisms:
-        organismDict[organism.name] = organism
-
-
-    priInterval = (geneRandMax - geneRandMin) / organismCount
-    priNormal = []
-    for i in xrange(organismCount):
-        priNormal.append(((i+0.25)*priInterval, (i+0.75)*priInterval))
-
-    genome = {}
-    for name in organismNames:
-        genome[name] = organismLocationGene
         
     #there should be one of these generated for every unique gene_space column 
-    def create_solution_class(self, genome, mutateOneOnly, crossoverRate, numMutants, fitnessFunction):
+    def create_solution_class(self, new_genome, new_mutateOneOnly, new_crossoverRate, new_numMutants, new_fitnessFunction):
         class newSolutionClass(OrganismClass):
             """
-            Each gene in the EQP solver represents the location
-            of one queen on the board
+            Organism which represents a solution to
+            the EQP
             """
-            randMin = new_randMin
-            randMax = new_randMax
+            genome = new_genome
             
-            mutProb = new_mutProb
-            mutAmt = new_mutAmt
+            mutateOneOnly = new_mutateOneOnly
+
+            crossoverRate = new_crossoverRate
+
+            numMutants = new_numMutants
             
-        def getCitiesInOrder(self):
-            """
-            return a list of the cities, sorted in order
-            of the respective priority values in this
-            organism's genotype
-            """
-            # create a sortable list of (priority, city) tuples
-            # (note that 'self[name]' extracts the city gene's phenotype,
-            # being the 'priority' of that city
-            sorter = [(self[name], organismDict[name]) for name in organismNames]
-
-            # now sort them, the priority elem will determine order
-            sorter.sort()
+            fitness = new_fitnessFunction
             
-            # now extract the city objects
-            sortedorganisms = [tup[1] for tup in sorter]
-
-            # done
-            return sortedorganisms
-
-        def getorganisms(self):
-            return [self[name] for name in organismNames]
-
         return newSolutionClass
 
                 
                 
+    #there should be one of these generated for every unique gene_space column 
+    def create_population_class(self, new_popInitSize, new_species, new_popChildCull, new_popChildCount, new_popIncest, new_popNumMutants, new_popNumRandomOrganisms, new_mutateAfterMating):
+        class newPopulationClass(Population):
+
+            initPopulation = new_popInitSize
+            species = new_species
+            
+            # cull to this many children after each generation
+            childCull = new_popChildCull
+            
+            # number of children to create after each generation
+            childCount = new_popChildCount
+            
+            # number of best parents to add in with next gen
+            incest = new_popIncest
+
+            mutants = new_popNumMutants
+
+            numNewOrganisms = new_popNumRandomOrganisms
+
+            mutateAfterMating = new_mutateAfterMating
+            
+        return newPopulationClass
 
 
-    class EQPSolutionPopulation(Population):
-
-        initPopulation = popInitSize
-        species = EQPSolution
-        
-        # cull to this many children after each generation
-        childCull = popChildCull
-        
-        # number of children to create after each generation
-        childCount = popChildCount
-        
-        # number of best parents to add in with next gen
-        incest = popIncest
-
-        mutants = popNumMutants
-
-        numNewOrganisms = popNumRandomOrganisms
-
-        mutateAfterMating = mutateAfterMating
         
     def __init__(self, model):
         problem.__init__(self, model)
-        self.population = EQPSolutionPopulation()
+        
+        #create an array of organisms
+        organisms = []
+        for i in xrange(numorganisms):
+            organisms.append(GraphTraverser("%s" % i))
+
+        #extract the organism names into an array
+        organismNames = [organism.name for organism in organisms]
+
+        #count the number of organisms
+        organismCount = len(organisms)
+
+        #organize the organisms into a dict with names as keys
+        organismDict = {}
+        for organism in organisms:
+            organismDict[organism.name] = organism
+
+
+        self.priInterval = (self.geneRandMax - self.geneRandMin) / self.organismCount
+        self.priNormal = []
+        for i in xrange(organismCount):
+            self.priNormal.append(((i+0.25)*self.priInterval, (i+0.75)*self.priInterval))
+
+        self.genome = {}
+        for name in organismNames:
+            self.genome[name] = self.organismLocationGene
+        solutionClass = create_solution_class(self.genome, self.mutateOneOnly, self.crossoverRate, self.numMutants, self.fitnessFunction)
+        self.population = create_population_class(self.popInitSize, solutionClass, self.popChildCull, self.popChildCount, self.popIncest, self.popNumMutants, self.popNumRandomOrganisms, self.mutateAfterMating)
         
     def cycle(self):
-        print "gen=%s best=%s avg=%s" % (i, pop.best().fitness(), pop.fitness())
-        pop.gen()
+        print "gen=%s best=%s avg=%s" % (i, self.population.best().fitness(), self.population.fitness())
+        population.gen()
     
 def run_eight_queens():
     m = EightQueensModel()
