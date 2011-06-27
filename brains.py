@@ -154,6 +154,10 @@ class GeneticAlgorithm(Algorithm):
     
         #eliminate organisms 
 
+class HopfieldAlgorithm(algorithm):
+    def __init__(self, problem):
+    #call the base init to save the problem
+        algorithm.__init__(self,problem)
 
 #begin code for the 8 queens problem
 class EightQueensModel(Model):
@@ -172,15 +176,52 @@ class EightQueensModel(Model):
     
     def randomize(self):
         new_states = []
-        new_state = []
-        for q in self.state:
-            for s in q:
-                random.seed()
-                new_state.append(random.randrange(0,7))
+        #Start with an empty board, and put N queens randomly
+        new_state = numpy.zeros(self.size);
+        q = 0
+        while q < self.size:
+            random.seed()
+            xrand = random.randrange(0,self.size);
+            yrand = random.randrange(0,self.size);
+            if new_state[xrand, yrand] == 0:
+                new_state[xrand, yrand] = 1;
+                q += 1;
         new_states.append(new_state)
-        
         self.state = new_states
 
+    def validate(self):
+        isSolution = true;
+        #Check row and column sums
+        for i in range(self.size):
+            int rowSum=0;
+            int colSum=0;
+            for j in range(self.size):
+                rowSum += round(self.state[i,j],1);
+                colSum += round(self.state[j,i],1);
+            if (rowSum != 1 or colSum != 1):
+                isSolution = false;
+        #Check lower diagonal
+        diagSum = 0.0;
+        for i in range(self.size):
+            for j in range(self.size):
+                for k in range(1,self.size):
+                    if ((i + k < self.size) and (j + k < self.size)):
+                        diagSum += round(self.state[i+k,j+k],1) * round(self.state[i,j],1);
+        if diagSum!=0:
+            isSolution = false;
+        #Check upper diagonal
+        diagSum = 0.0;
+        for i in range(self.size):
+            for j in range(self.size):
+                for k in range(1,self.size):
+                   if ((i + k < self.size) and (j - k >= 0)):
+                        diagSum += round(self.state[i+k,j-k],1)*  round( self.state[i,j],1) ;
+        if diagSum!=0:
+            isSolution = false;
+        if isSolution:                        
+            Solution(self, self.state, self.E);
+
+  
     def determine_energy(self):
         #The 8Q energy function is 0 when we have a solution                                 
         #Count number in each row
