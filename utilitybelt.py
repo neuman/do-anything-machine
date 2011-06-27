@@ -8,10 +8,10 @@ from django.core.serializers import json, serialize
 from django.db.models.query import QuerySet
 from django.http import HttpResponse, HttpResponseServerError
 from django.utils import simplejson
-from django.db.models.query import delete_objects, Q
+#from django.db.models.query import delete_objects, Q
 from exceptions import Exception
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
-from citizengroove.settings import PAGINATION_COUNT, CHUNK_MAXIMUM
+#from citizengroove.settings import PAGINATION_COUNT, CHUNK_MAXIMUM
 from django.contrib.auth.decorators import user_passes_test
 
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, HttpResponseNotFound, Http404
