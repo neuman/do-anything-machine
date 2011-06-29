@@ -342,6 +342,39 @@ class EightQueensModel(Model):
         
         self.state = new_states
 
+    def validate(self):
+        isSolution = true;
+        #Check row and column sums
+        for i in range(self.size):
+            int rowSum=0;
+            int colSum=0;
+            for j in range(self.size):
+                rowSum += round(self.state[i,j],1);
+                colSum += round(self.state[j,i],1);
+            if (rowSum != 1 or colSum != 1):
+                isSolution = false;
+        #Check lower diagonal
+        diagSum = 0.0;
+        for i in range(self.size):
+            for j in range(self.size):
+                for k in range(1,self.size):
+                    if ((i + k < self.size) and (j + k < self.size)):
+                        diagSum += round(self.state[i+k,j+k],1) * round(self.state[i,j],1);
+        if diagSum!=0:
+            isSolution = false;
+        #Check upper diagonal
+        diagSum = 0.0;
+        for i in range(self.size):
+            for j in range(self.size):
+                for k in range(1,self.size):
+                   if ((i + k < self.size) and (j - k >= 0)):
+                        diagSum += round(self.state[i+k,j-k],1)*  round( self.state[i,j],1) ;
+        if diagSum!=0:
+            isSolution = false;
+        if isSolution:                        
+            Solution(self, self.state, self.E);
+
+  
     def determine_energy(self):
         #The 8Q energy function is 0 when we have a solution                                 
         #Count number in each row
@@ -349,7 +382,7 @@ class EightQueensModel(Model):
         for i in range(self.size):
             IntermediateEASum = -1.0;
             for k in range(self.size):
-                IntermediateEASum += self.state[i][k];  
+                IntermediateEASum += self.state[i,k];  
             EASum += math.pow(IntermediateEASum, 2);        
         #Count number in each column
         EBSum = 0.0;
@@ -380,7 +413,6 @@ class EightQueensModel(Model):
         math.pow(EESum - self.size,2);
          # calculate E
         E = 0.5 * (EASum + EBSum + ECSum + EDSum + EESum);
-        return E
         
     def load_state(self, state):
         self.state = state
@@ -395,6 +427,13 @@ class EightQueensProblem(Problem):
     
     def i_dont_know(self):
         pass
+        
+        
+#begin code for hopfield
+class HopfieldAlgorithm(algorithm):
+    def __init__(self, problem):
+    #call the base init to save the problem
+        algorithm.__init__(self,problem)
 
     
 def run_eight_queens():
