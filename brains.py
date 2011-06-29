@@ -14,18 +14,7 @@ class Problem(object):
         self.model = model
         
         
-    def solve(self):
-        "run the cycle function until something passes validation"
-        # now repeatedly calculate generations
-        i = 0
-        print "gen="+i.__str__()
-        try:
-            while True:
-                self.cycle()
-        except KeyboardInterrupt:
-            pass
-            
-        print self.model.__str__()
+
 
 class Model(object):
     "an instance of this is one state of the model, also known as a solution"
@@ -105,7 +94,7 @@ class Solution(object):
         
 
 
-class Algorithm:
+class Algorithm(object):
     problem = None
     solutions= []
     best = None
@@ -136,6 +125,19 @@ class Algorithm:
     def get_solution_count(self):
         return self.solutions.items().__len__()
         
+    def solve(self):
+        "run the cycle function until something passes validation"
+        # now repeatedly calculate generations
+        i = 0
+        print "gen="+i.__str__()
+        try:
+            while True:
+                self.cycle()
+        except KeyboardInterrupt:
+            pass
+            
+        print self.problem.model.__str__()
+        
 #begin code for genetic algorithm
 from random import random
 from math import sqrt
@@ -146,15 +148,172 @@ from pygene.population import Population
 
 class GeneticAlgorithm(Algorithm):
     
-    def __init__(self, problem):
-        #call the base init to save the problem
-        Algorithm.__init__(self,problem)
+    mutateOneOnly = False
+
+    BaseGeneClass = IntGene
         
-        #generate an organism population with a count the same as the count of genes (HACK)
-        
-        #determine and save the fitness of each organism by feeding it through the energy function
+    width = 500
+    height = 500
+
+    # set the number of cities in our tour
+    numorganisms  = 8
     
-        #eliminate organisms 
+    geneRandMin = 0        #represents the size of a chess board
+    geneRandMax = 7
+    geneMutProb = 0.5
+    geneMutAmt = 1         # only if not using FloatGeneRandom
+
+    popInitSize = 8
+    popChildCull = 20
+    popChildCount = 100
+    popIncest = 8           # number of best parents to add to children
+    popNumMutants = 0.7     # proportion of mutants each generation
+    popNumRandomOrganisms = 3  # number of random organisms per generation
+
+    mutateOneOnly = False
+
+    BaseGeneClass = IntGene
+    #BaseGeneClass = FloatGeneRandom
+
+    OrganismClass = MendelOrganism
+    #OrganismClass = Organism
+
+    mutateAfterMating = True
+
+    crossoverRate = 0.05
+    
+    population = None
+    
+    organismNames = []
+ 
+    #there should be one of these generated for every unique gene_space column 
+    def create_gene_class(self, new_randMin, new_randMax, new_mutProb, new_mutAmt):
+        class newGeneClass(self.BaseGeneClass):
+            """
+            Each gene in the EQP solver represents the location
+            of one queen on the board
+            """
+            randMin = new_randMin
+            randMax = new_randMax
+            
+            mutProb = new_mutProb
+            mutAmt = new_mutAmt
+
+        return newGeneClass
+    
+    
+
+       
+    #there should be one of these generated for every unique gene_space column 
+    def create_solution_class(self, new_genome, new_mutateOneOnly, new_crossoverRate, new_numMutants):
+        this_problem = self.problem
+        this_algorithm = self
+        class newSolutionClass(self.OrganismClass):
+            """
+            Organism which represents a solution to
+            the EQP
+            """
+            genome = new_genome
+            
+            mutateOneOnly = new_mutateOneOnly
+
+            crossoverRate = new_crossoverRate
+
+            numMutants = new_numMutants
+            
+            problem = this_problem
+            
+            algorithm = this_algorithm
+            
+            #fitness = new_fitnessFunction
+            
+            
+                
+            def fitness(self):
+                self.problem.model.load_state(self.getValues())
+                return self.problem.model.determine_energy()
+
+                
+            def getValues(self):
+                old_array =  [self[name] for name in self.algorithm.organismNames]
+                new_array = []
+                for a in old_array:
+                    #create a row with a queen in the appropriate location
+                    temp_array = [0]*self.algorithm.numorganisms
+                    temp_array[a] = 1
+                    new_array.append(temp_array)
+                return new_array
+                    
+        return newSolutionClass
+
+                
+                
+    #there should be one of these generated for every unique gene_space column 
+    def create_population_class(self, new_popInitSize, new_species, new_popChildCull, new_popChildCount, new_popIncest, new_popNumMutants, new_popNumRandomOrganisms, new_mutateAfterMating):
+        class newPopulationClass(Population):
+
+            initPopulation = new_popInitSize
+            species = new_species
+            
+            # cull to this many children after each generation
+            childCull = new_popChildCull
+            
+            # number of children to create after each generation
+            childCount = new_popChildCount
+            
+            # number of best parents to add in with next gen
+            incest = new_popIncest
+
+            mutants = new_popNumMutants
+
+            numNewOrganisms = new_popNumRandomOrganisms
+
+            mutateAfterMating = new_mutateAfterMating
+            
+        return newPopulationClass
+
+
+        
+    def __init__(self, model):
+        Algorithm.__init__(self, model)
+        
+        #create an array of organisms
+        organisms = []
+        for i in xrange(self.numorganisms):
+            organisms.append(GraphTraverser("%s" % i))
+
+        #extract the organism names into an array
+        self.organismNames = [organism.name for organism in organisms]
+
+        #count the number of organisms
+        organismCount = len(organisms)
+
+        #organize the organisms into a dict with names as keys
+        organismDict = {}
+        for organism in organisms:
+            organismDict[organism.name] = organism
+
+
+        priInterval = (self.geneRandMax - self.geneRandMin) / organismCount
+        priNormal = []
+        for i in xrange(organismCount):
+            priNormal.append(((i+0.25)*priInterval, (i+0.75)*priInterval))
+
+        self.genome = {}
+        for name in self.organismNames:
+            self.genome[name] = self.create_gene_class(self.geneRandMin, self.geneRandMax, self.geneMutProb, self.geneMutAmt)
+            
+        solutionClass = self.create_solution_class(self.genome, self.mutateOneOnly, self.crossoverRate, self.popNumMutants)
+        populationClass = self.create_population_class(self.popInitSize, solutionClass, self.popChildCull, self.popChildCount, self.popIncest, self.popNumMutants, self.popNumRandomOrganisms, self.mutateAfterMating)
+        self.population = populationClass()
+        #print "self.population.species: "+type(self.population.species).__name__
+        #species_instance = self.population.species()
+        #species_instance.fitness()
+        
+    def cycle(self):
+       #print "self.population: "+type(self.population).__name__
+        print "best=%s avg=%s" % (self.population.best().fitness(), self.population.fitness())
+        self.population.gen()
 
 
 #begin code for the 8 queens problem
@@ -233,176 +392,19 @@ class EightQueensModel(Model):
 
         
 class EightQueensProblem(Problem):
-    mutateOneOnly = False
-
-    BaseGeneClass = IntGene
-        
-    width = 500
-    height = 500
-
-    # set the number of cities in our tour
-    numorganisms  = 8
     
-    geneRandMin = 0        #represents the size of a chess board
-    geneRandMax = 7
-    geneMutProb = 0.5
-    geneMutAmt = 1         # only if not using FloatGeneRandom
+    def i_dont_know(self):
+        pass
 
-    popInitSize = 8
-    popChildCull = 20
-    popChildCount = 100
-    popIncest = 8           # number of best parents to add to children
-    popNumMutants = 0.7     # proportion of mutants each generation
-    popNumRandomOrganisms = 3  # number of random organisms per generation
-
-    mutateOneOnly = False
-
-    BaseGeneClass = IntGene
-    #BaseGeneClass = FloatGeneRandom
-
-    OrganismClass = MendelOrganism
-    #OrganismClass = Organism
-
-    mutateAfterMating = True
-
-    crossoverRate = 0.05
-    
-    population = None
-    
-    organismNames = []
-    
-
-
-    #there should be one of these generated for every unique gene_space column 
-    def create_gene_class(self, new_randMin, new_randMax, new_mutProb, new_mutAmt):
-        class newGeneClass(self.BaseGeneClass):
-            """
-            Each gene in the EQP solver represents the location
-            of one queen on the board
-            """
-            randMin = new_randMin
-            randMax = new_randMax
-            
-            mutProb = new_mutProb
-            mutAmt = new_mutAmt
-
-        return newGeneClass
-    
-    
-
-       
-    #there should be one of these generated for every unique gene_space column 
-    def create_solution_class(self, new_genome, new_mutateOneOnly, new_crossoverRate, new_numMutants):
-        this_problem = self
-        class newSolutionClass(self.OrganismClass):
-            """
-            Organism which represents a solution to
-            the EQP
-            """
-            genome = new_genome
-            
-            mutateOneOnly = new_mutateOneOnly
-
-            crossoverRate = new_crossoverRate
-
-            numMutants = new_numMutants
-            
-            problem = this_problem
-            
-            #fitness = new_fitnessFunction
-            
-            
-                
-            def fitness(self):
-                self.problem.model.load_state(self.getValues())
-                return self.problem.model.determine_energy()
-
-                
-            def getValues(self):
-                old_array =  [self[name] for name in self.problem.organismNames]
-                new_array = []
-                for a in old_array:
-                    #create a row with a queen in the appropriate location
-                    temp_array = [0]*self.problem.numorganisms
-                    temp_array[a] = 1
-                    new_array.append(temp_array)
-                return new_array
-                    
-        return newSolutionClass
-
-                
-                
-    #there should be one of these generated for every unique gene_space column 
-    def create_population_class(self, new_popInitSize, new_species, new_popChildCull, new_popChildCount, new_popIncest, new_popNumMutants, new_popNumRandomOrganisms, new_mutateAfterMating):
-        class newPopulationClass(Population):
-
-            initPopulation = new_popInitSize
-            species = new_species
-            
-            # cull to this many children after each generation
-            childCull = new_popChildCull
-            
-            # number of children to create after each generation
-            childCount = new_popChildCount
-            
-            # number of best parents to add in with next gen
-            incest = new_popIncest
-
-            mutants = new_popNumMutants
-
-            numNewOrganisms = new_popNumRandomOrganisms
-
-            mutateAfterMating = new_mutateAfterMating
-            
-        return newPopulationClass
-
-
-        
-    def __init__(self, model):
-        Problem.__init__(self, model)
-        
-        #create an array of organisms
-        organisms = []
-        for i in xrange(self.numorganisms):
-            organisms.append(GraphTraverser("%s" % i))
-
-        #extract the organism names into an array
-        self.organismNames = [organism.name for organism in organisms]
-
-        #count the number of organisms
-        organismCount = len(organisms)
-
-        #organize the organisms into a dict with names as keys
-        organismDict = {}
-        for organism in organisms:
-            organismDict[organism.name] = organism
-
-
-        priInterval = (self.geneRandMax - self.geneRandMin) / organismCount
-        priNormal = []
-        for i in xrange(organismCount):
-            priNormal.append(((i+0.25)*priInterval, (i+0.75)*priInterval))
-
-        self.genome = {}
-        for name in self.organismNames:
-            self.genome[name] = self.create_gene_class(self.geneRandMin, self.geneRandMax, self.geneMutProb, self.geneMutAmt)
-            
-        solutionClass = self.create_solution_class(self.genome, self.mutateOneOnly, self.crossoverRate, self.popNumMutants)
-        populationClass = self.create_population_class(self.popInitSize, solutionClass, self.popChildCull, self.popChildCount, self.popIncest, self.popNumMutants, self.popNumRandomOrganisms, self.mutateAfterMating)
-        self.population = populationClass()
-        #print "self.population.species: "+type(self.population.species).__name__
-        #species_instance = self.population.species()
-        #species_instance.fitness()
-        
-    def cycle(self):
-       #print "self.population: "+type(self.population).__name__
-        print "best=%s avg=%s" % (self.population.best().fitness(), self.population.fitness())
-        self.population.gen()
     
 def run_eight_queens():
     m = EightQueensModel()
+    print m
     p = EightQueensProblem(m)
-    p.solve()
+    print p
+    g = GeneticAlgorithm(p)
+    print g
+    g.solve()
     
     
     
