@@ -346,11 +346,11 @@ class EightQueensModel(Model):
         isSolution = true;
         #Check row and column sums
         for i in range(self.size):
-            int rowSum=0;
-            int colSum=0;
+            rowSum=0;
+            colSum=0;
             for j in range(self.size):
-                rowSum += round(self.state[i,j],1);
-                colSum += round(self.state[j,i],1);
+                rowSum += round(self.state[i][j],1);
+                colSum += round(self.state[j][i],1);
             if (rowSum != 1 or colSum != 1):
                 isSolution = false;
         #Check lower diagonal
@@ -359,7 +359,7 @@ class EightQueensModel(Model):
             for j in range(self.size):
                 for k in range(1,self.size):
                     if ((i + k < self.size) and (j + k < self.size)):
-                        diagSum += round(self.state[i+k,j+k],1) * round(self.state[i,j],1);
+                        diagSum += round(self.state[i+k][j+k],1) * round(self.state[i][j],1);
         if diagSum!=0:
             isSolution = false;
         #Check upper diagonal
@@ -368,7 +368,7 @@ class EightQueensModel(Model):
             for j in range(self.size):
                 for k in range(1,self.size):
                    if ((i + k < self.size) and (j - k >= 0)):
-                        diagSum += round(self.state[i+k,j-k],1)*  round( self.state[i,j],1) ;
+                        diagSum += round(self.state[i+k][j-k],1)*  round( self.state[i][j],1) ;
         if diagSum!=0:
             isSolution = false;
         if isSolution:                        
@@ -382,14 +382,14 @@ class EightQueensModel(Model):
         for i in range(self.size):
             IntermediateEASum = -1.0;
             for k in range(self.size):
-                IntermediateEASum += self.state[i,k];  
+                IntermediateEASum += self.state[i][k];  
             EASum += math.pow(IntermediateEASum, 2);        
         #Count number in each column
         EBSum = 0.0;
         for i in range(self.size):
             IntermediateEBSum = -1.0;
             for k in range(self.size):
-                IntermediateEBSum += self.state[k,j];
+                IntermediateEBSum += self.state[k][j];
             EBSum += math.pow(IntermediateEBSum, 2);        
         #Count number in each diagonal (rising)
         ECSum = 0.0;
@@ -397,19 +397,19 @@ class EightQueensModel(Model):
             for j in range(self.size):
                 for k in range(1,self.size):
                     if ((i + k < self.size) and (j + k < self.size)):
-                        ECSum += self.state[i+k,j+k] * self.state[i,j];                
+                        ECSum += self.state[i+k][j+k] * self.state[i][j];                
         #Count number in each diagonal (falling)
         EDSum = 0.0;
         for i in range(self.size):
             for j in range(self.size):
                 for k in range(1,self.size):
                    if ((i + k < self.size) and (j - k >= 0)):
-                        EDSum += self.V[i+k,j-k] * self.V[i,j];
+                        EDSum += self.state[i+k][j-k] * self.state[i][j];
         #Count total number of queens                         
         EESum = 0.0
         for i in range(self.size):
             for j in range(self.size):
-                EESum += self.V[i,j];
+                EESum += self.state[i][j];
         math.pow(EESum - self.size,2);
          # calculate E
         E = 0.5 * (EASum + EBSum + ECSum + EDSum + EESum);
