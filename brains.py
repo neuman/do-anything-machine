@@ -346,8 +346,8 @@ class EightQueensModel(Model):
         isSolution = true;
         #Check row and column sums
         for i in range(self.size):
-            int rowSum=0;
-            int colSum=0;
+            rowSum=0
+            colSum=0
             for j in range(self.size):
                 rowSum += round(self.state[i,j],1);
                 colSum += round(self.state[j,i],1);
@@ -430,7 +430,7 @@ class EightQueensProblem(Problem):
         
         
 #begin code for hopfield
-class HopfieldAlgorithm(algorithm):
+class HopfieldAlgorithm(Algorithm):
     def __init__(self, problem):
     #call the base init to save the problem
         algorithm.__init__(self,problem)
