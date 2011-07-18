@@ -129,10 +129,11 @@ class Algorithm(object):
         "run the cycle function until something passes validation"
         # now repeatedly calculate generations
         i = 0
-        print "gen="+i.__str__()
+        
         try:
             while True:
                 self.cycle()
+                print "gen="+i.__str__()
         except KeyboardInterrupt:
             pass
             
@@ -231,17 +232,24 @@ class GeneticAlgorithm(Algorithm):
                 
             def fitness(self):
                 self.problem.model.load_state(self.getValues())
-                return self.problem.model.determine_energy()
+                print "determining fintess..."
+                energy = self.problem.model.determine_energy()
+                print "energy: "+self.problem.model.determine_energy().__str__()
+                return energy
 
                 
             def getValues(self):
+                print "getting values..."
                 old_array =  [self[name] for name in self.algorithm.organismNames]
                 new_array = []
+                
                 for a in old_array:
                     #create a row with a queen in the appropriate location
+                    #print "numorganisms: "+self.algorithm.numorganisms.__str__()
                     temp_array = [0]*self.algorithm.numorganisms
                     temp_array[a] = 1
                     new_array.append(temp_array)
+                print "new values: "+new_array.__str__()
                 return new_array
                     
         return newSolutionClass
@@ -293,8 +301,11 @@ class GeneticAlgorithm(Algorithm):
         for organism in organisms:
             organismDict[organism.name] = organism
 
+        #print "geneRandMax: "+self.geneRandMax.__str__()
+        #print "geneRandMin: "+self.geneRandMin.__str__()
+        #print "organismCount: "+organismCount.__str__()
 
-        priInterval = (self.geneRandMax - self.geneRandMin) / organismCount
+        priInterval =  (self.geneRandMax - self.geneRandMin)/organismCount
         priNormal = []
         for i in xrange(organismCount):
             priNormal.append(((i+0.25)*priInterval, (i+0.75)*priInterval))
@@ -314,6 +325,7 @@ class GeneticAlgorithm(Algorithm):
        #print "self.population: "+type(self.population).__name__
         print "best=%s avg=%s" % (self.population.best().fitness(), self.population.fitness())
         self.population.gen()
+        return 
 
 
 #begin code for the 8 queens problem
@@ -414,11 +426,21 @@ class EightQueensModel(Model):
          # calculate E
         E = 0.5 * (EASum + EBSum + ECSum + EDSum + EESum);
         
+        return E
+        
     def load_state(self, state):
         self.state = state
         
     def __str__(self):
         return self.state.__str__()
+        
+    def __print__(self, array=None):
+        if array == None:
+            array = self.state
+        for n in array:
+            l = ["O"]*8
+            l[n] = "X"
+            print l
 
                                  
 
