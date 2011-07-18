@@ -1,5 +1,6 @@
 #from pygraph.classes.graph import graph
 import random, math
+import time, datetime
 
 def random_string(length):
     import random
@@ -129,15 +130,17 @@ class Algorithm(object):
         "run the cycle function until something passes validation"
         # now repeatedly calculate generations
         i = 0
+        t = time.time()
         
         try:
             while True:
                 self.cycle()
                 print "gen="+i.__str__()
+                print str(datetime.timedelta(seconds=(time.time()-t)))
+                i += 1
         except KeyboardInterrupt:
             pass
-            
-        print self.problem.model.__str__()
+        self.problem.model.__print__()
         
 #begin code for genetic algorithm
 from random import random
@@ -232,14 +235,14 @@ class GeneticAlgorithm(Algorithm):
                 
             def fitness(self):
                 self.problem.model.load_state(self.getValues())
-                print "determining fintess..."
+                #print "determining fintess..."
                 energy = self.problem.model.determine_energy()
-                print "energy: "+self.problem.model.determine_energy().__str__()
+                #print "energy: "+energy
                 return energy
 
                 
             def getValues(self):
-                print "getting values..."
+                #print "getting values..."
                 old_array =  [self[name] for name in self.algorithm.organismNames]
                 new_array = []
                 
@@ -249,7 +252,7 @@ class GeneticAlgorithm(Algorithm):
                     temp_array = [0]*self.algorithm.numorganisms
                     temp_array[a] = 1
                     new_array.append(temp_array)
-                print "new values: "+new_array.__str__()
+                #print "new values: "+new_array.__str__()
                 return new_array
                     
         return newSolutionClass
@@ -437,10 +440,12 @@ class EightQueensModel(Model):
     def __print__(self, array=None):
         if array == None:
             array = self.state
+            #print "state array:"+array.__str__()
         for n in array:
-            l = ["O"]*8
-            l[n] = "X"
-            print l
+            #l = ["O"]*8
+            #l[n] = "X"
+            #print l
+            print n.__str__()
 
                                  
 
@@ -467,8 +472,7 @@ def run_eight_queens():
     print g
     g.solve()
     
-    
-    
+
     
     
     
