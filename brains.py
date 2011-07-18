@@ -1,4 +1,4 @@
-from pygraph.classes.graph import graph
+#from pygraph.classes.graph import graph
 import random, math
 
 def random_string(length):
@@ -389,7 +389,7 @@ class EightQueensModel(Model):
         for i in range(self.size):
             IntermediateEBSum = -1.0;
             for k in range(self.size):
-                IntermediateEBSum += self.state[k][j];
+                IntermediateEBSum += self.state[k][i];
             EBSum += math.pow(IntermediateEBSum, 2);        
         #Count number in each diagonal (rising)
         ECSum = 0.0;
