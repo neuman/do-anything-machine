@@ -23,46 +23,66 @@ class Mixin2( object ):
     def something( self ):
         pass # another
 
-class Exhaustive(object):
+class Seeker(object):
+
+    _model = None
+
+    def next(self):
+        raise NotImplementedError( "Should have implemented this" )
+
+    @property
+    def current(self):
+        raise NotImplementedError( "Should have implemented this" )
+
+    @current.setter
+    def current(self, value):
+        raise NotImplementedError( "Should have implemented this" )
+
+    def learn( self ):
+        "Some seekers are blind."
+        pass
+
+class Exhaustive(Seeker):
 
     def __init__(self, model):
         super(Exhaustive, self).__init__()
-        self.model = model
-        self.space = self.model.get_space()
-        self.exhausted = []
-        self.reset()
-
-    def reset(self):
-        self.cursor = len(self.space)-1
-        self.current = self.model.children[self.cursor]
+        self._model = model
 
     def next(self):
-        'spit out the next attempt, in this case the next permutation'
-        output = []
-        #print "cursor("+str(self.cursor)+")"
-        for dimension in self.model.children:
-            output.append(dimension.current())
-        try:
-            self.current.next()
-        except DimensionIndexError as e:
-            #print e
-            #print self.cursor
-            #print 'moving cursor'
-            self.cursor -=1
-            #print self.cursor
-            if self.cursor >= 0:
-                self.current.reset()
-                self.current = self.model.children[self.cursor]
-            else:
-                return output
-        return output
+        'seeks the next coordinate in the space and returns it'
+        return self._model.space.next()
 
+    @property
+    def current(self):
+        'return current coordinates'
+        return self._model.space.current()
 
-    def exhaust(self, space, depth=0):
-        'a function to help me figure out how to write next()'
-        coordinates.extend(self.exhaust())
-        return coordinates
+    @current.setter
+    def current(self, value):
+        'recieve new coordinates and reset to them'
+        self._model._space._current = value
+        self.reset()
 
+class DiceRolling(Seeker):
+
+    def __init__(self, model):
+        super(DiceRolling, self).__init__()
+        self._model = model
+
+    def next(self):
+        'seeks the next coordinate in the space and returns it'
+        return self._model.space.randomize()
+
+    @property
+    def current(self):
+        'return current coordinates'
+        return self._model.space.current()
+
+    @current.setter
+    def current(self, value):
+        'recieve new coordinates and reset to them'
+        self._model._space._current = value
+        self.reset()
 
 '''
 class Concrete2( SomeAbstraction, Mixin2 ):

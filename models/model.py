@@ -1,13 +1,4 @@
-'''
-class Model(object):
-    'get_space should return a list of lists, each of which contain all possible selections for that variable'
-    children = []
-    def get_space(self):
-        output = []
-        for c in self.children:
-            output.extend(c.get_space())
-        return output
-'''
+import random
 
 class Model(list):
     'get_space should return a list of lists, each of which contain all possible selections for that variable'
@@ -31,10 +22,9 @@ class Model(list):
         it's worth noting that any model can be evaluated independently
         '''
         if self._space == None:
-            print self._space
             self._space = Space()
             for c in self:
-                self._space.append(c)
+                self._space.append(c.get_space())
         return self._space
 
 class DimensionIndexError( Exception ): pass
@@ -64,17 +54,24 @@ class Space(list):
 
         return self.current()
 
+    def randomize(self):
+        'return a random set of coordinates within the space'
+        output = []
+        for dimension in self:
+            output.append(dimension.randomize())
+        return output
+
 class Dimension(list):
     def __init__(self,name, spread):
         super(Dimension, self).__init__()
-        self.name = name
+        self._name = name
         self.extend(spread)
-        self.min = self[0]
-        self.max = len(self)-1
+        self._min = 0
+        self._max = len(self)-1
         self.reset()
 
     def get_space(self):
-        return [self]
+        return self
 
     def reset(self):
         self.cursor = 0
@@ -89,6 +86,11 @@ class Dimension(list):
     def current(self):
         return self[self.cursor]
 
+    def randomize(self):
+        "return a random coordinate"
+        self.cursor = random.randrange(self._min, self._max)
+        return self[self.cursor]
+
 class Integer(Dimension):
     pass
 
@@ -100,22 +102,19 @@ class List(Dimension):
     'should add to the output space n times the output space of the child'
     def __init__(self,name, max, child):
         super(List, self).__init__(name, range(0,max+1))
-        print child
-        self.child = child
         self.child = child
 
     def get_space(self):
         sp = self.child
-        print self.child
         return sp*self.max
 
 class Test(Model):
     def __init__(self):
         super(Test, self).__init__()
         self.extend([
-        Integer('row', range(0,3)),
-        Integer('row', range(0,3)),
-        Integer('row', range(0,3))
+        Integer('row', range(0,10)),
+        Integer('row', ["A","B","C","D"]),
+        Integer('row', ["@","$","%"])
         ])
 
 
@@ -123,7 +122,11 @@ class Queen(Model):
     def __init__(self):
         self.extend([
         Integer('row', range(1,9)),
-        Integer('row', range(1,9))
+        Integer('row', ["A","B","C","D","E","F","G","H"]),
+        Integer('row', range(1,9)),
+        Integer('row', ["A","B","C","D","E","F","G","H"]),
+        Integer('row', range(1,9)),
+        Integer('row', ["A","B","C","D","E","F","G","H"])
         ])
 
 class NineQueens(Model):

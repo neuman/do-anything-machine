@@ -1,16 +1,18 @@
 import models.model as models
 import algorithms.supervised as supervised
-t = models.NineQueens()
-print t.space
-print t.space.current()
+t = models.Test()
+space = t.space
+current = t.space.current()
+
+#q = models.NineQueens()
+#print q.space
+#print q.space.current()
+
+e = supervised.Exhaustive(t)
 
 
-
-for w in range(0,200):
-    print t.space.next()
-
-'''
 go = True
+output = []
 while go==True:
     try:
         print e.next()
@@ -18,5 +20,4 @@ while go==True:
         print e
         go = False
 
-#e = supervised.Exhaustive(n)
-'''
+
