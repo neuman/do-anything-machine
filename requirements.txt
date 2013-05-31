@@ -1,1 +1,1 @@
-pygene>=0
+Pyevolve==0.5
