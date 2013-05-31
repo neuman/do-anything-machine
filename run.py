@@ -39,4 +39,6 @@ n = sp.current
 
 '''
 Django for Machine Learning That Learns Itself
+making use of docstring access to allow comparison of algorithms with off the shelf text comparers 
+
 '''
