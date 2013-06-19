@@ -7,16 +7,16 @@ class Number(Model):
             low = 0
             high = 10
             self.extend([
-            Integer('digit', range(low, high)),
-            Integer('digit', range(low, high)),
-            Integer('digit', range(low, high)),
-            Integer('digit', range(low, high)),
-            Integer('digit', range(low, high)),
-            Integer('digit', range(low, high)),
-            Integer('digit', range(low, high)),
-            Integer('digit', range(low, high)),
-            Integer('digit', range(low, high)),
-            Integer('digit', range(low, high))
+            Integer('digit 1', range(low, high)),
+            Integer('digit 2', range(low, high)),
+            Integer('digit 3', range(low, high)),
+            Integer('digit 4', range(low, high)),
+            Integer('digit 5', range(low, high)),
+            Integer('digit 6', range(low, high)),
+            Integer('digit 7', range(low, high)),
+            Integer('digit 8', range(low, high)),
+            Integer('digit 9', range(low, high)),
+            Integer('digit 10', range(low, high))
             ])
 
 class WhatsMyNumber(Question):
@@ -29,11 +29,11 @@ class WhatsMyNumber(Question):
         self.model = Number()
 
     def __str__(self):
-        return "What's my number?"
+        return "What's my phone number?"
 
     def check( self , coordinates ):
         """
-        Check to see if the coordinates are valid first then grade if possible.
+        Check to see if the queens can attack each other.
 
         :param coordinates: an array of digits that address a state in the space.
         

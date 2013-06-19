@@ -1,3 +1,14 @@
+class Representation(object):
+    name = None
+    
+    def __init__(self, name=None):
+        #make the graph variable an actual object
+        if name!= None:
+            self.name = name
+        else:
+            self.name = random_string(15)
+
+
 class Graph(Representation):
     "some mathematical graph object we'll probably steal"
     graph = None

@@ -26,7 +26,6 @@ class EightQueens(Question):
     """
 
     def __init__(self):
-        self.target = [2,1,7,4,0,8,2,8,9,6]
         self.model = Number()
 
     def __str__(self):
@@ -34,7 +33,7 @@ class EightQueens(Question):
 
     def check( self , coordinates ):
         """
-        Check to see if the coordinates are valid first then grade if possible.
+        Check to see if the queens can attack each other.
 
         :param coordinates: an array of digits that address a state in the space.
         
