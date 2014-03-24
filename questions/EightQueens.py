@@ -140,6 +140,9 @@ class EightQueens(Question):
         warmth = 0
         if coordinates is None:
             warmth = 0
+        elif sum(coordinates) != sum(range(1,9)):
+            print "blah"
+            warmth = 0
         else:
             warmth = 1
 

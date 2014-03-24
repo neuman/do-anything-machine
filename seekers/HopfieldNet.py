@@ -24,7 +24,8 @@ class HopfieldNet(Seeker):
     def next(self):
         'seeks the next coordinate in the space and returns it.  More accurately, trains the Hopfield Net and returns the most optimal result'
         if self._firstrun == False:
-            self._model._space = self._model.space.randomize()
+            if (self._model._space == None):
+                self._model._space = self._model.space.randomize()
             self.to2D()
             self._model.energy(self._model._space)
         Elast = 0

@@ -16,6 +16,7 @@ def run(question, seeker, verbose=False):
             if verbose:
                 print "checking "+str(current)
             warmth = question.check(current)
+
             if warmth == 1:
                 raise Exception("Answer to '"+str(question)+"' found in "+str(tries)+" tries using "+str(seeker)+":"+str(current))
                 # go = False
