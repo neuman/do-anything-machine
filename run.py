@@ -1,6 +1,8 @@
 from models import base as models
 from seekers.Exhaustive import Exhaustive
 from seekers.DiceRolling import DiceRolling
+from seekers.HopfieldNet import HopfieldNet
+from questions.EightQueens import EightQueens
 from questions.WhatsMyNumber import WhatsMyNumber
 
 def run(question, seeker, verbose=False):
@@ -12,27 +14,27 @@ def run(question, seeker, verbose=False):
             tries +=1
             current = seeker.next()
             if verbose:
-                print "checking"+str(current)
-            checked = question.check(current)
-            if checked.warmth == 1:
+                print "checking "+str(current)
+            warmth = question.check(current)
+            if warmth == 1:
                 raise Exception("Answer to '"+str(question)+"' found in "+str(tries)+" tries using "+str(seeker)+":"+str(current))
-
+                # go = False
         except Exception as e:
             print e
             go = False
 
+q = EightQueens()
 
-q = WhatsMyNumber()
-print q.model.space.permutations
-run(q,Exhaustive)
-run(q,DiceRolling)
-
-
-
-sp = q.model.space
-n = sp.current
+# print q._model._space
+#run(q,Exhaustive)
+run(q,HopfieldNet,True)
 
 
+
+#sp = q.model.space
+#n = sp.current
+
+#run(q,Exhaustive)
 
 
 
