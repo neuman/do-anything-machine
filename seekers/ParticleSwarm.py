@@ -23,24 +23,11 @@ class ParticleSwarmOptimization(Seeker):
         self.N = len(self._model._space)         # Number of Queens
         self.numParticles = 150                  # Number of Particles in swarm
         self.Tmax = 500                          # Max number of iterations  
-        self.x_prev = [];
-        self.x_new = [];
-        f = [];
 
-        for i in range(self.numParticles):
-            self.x_prev.append(self.generateRandomParticle(self.N,1,self.N))
-            f.append(self._model.fitness(self.x_prev[i][:]))
-            self.x_new.append(self.generateRandomParticle(self.N,1,self.N))
 
-        self.pid = self.x_prev
-        self.pgd = self.pid[f.index(min(f))]
-        fbest = min(f)
 
-        self.v_prev = [[random.uniform(-1,1)]*self.N]*self.numParticles
-        self.v_new = [[0]*self.N]*self.numParticles
 
-        self.stop = False
-        self.G = 1
+
 
                 
         
@@ -49,33 +36,49 @@ class ParticleSwarmOptimization(Seeker):
         return "Particle Swarm Optimization"
 
     def next(self):
+        self.x_prev = [];
+        self.x_new = [];
+        self.f = [];
+        for i in range(self.numParticles):
+            self.x_prev.append(self.generateRandomParticle(self.N,1,self.N))
+            self.f.append(self._model.fitness(self.x_prev[i][:]))
+            self.x_new.append(self.generateRandomParticle(self.N,1,self.N))
+
+        self.pid = self.x_prev
+        self.pgd = self.pid[self.f.index(min(self.f))]
+        fbest = min(self.f)
+
+        self.v_prev = [[random.uniform(-1,1)]*self.N]*self.numParticles
+        self.v_new = [[0]*self.N]*self.numParticles
+        stop = False
+        G = 1
         'seeks the next coordinate in the space and returns it.  More accurately, trains the Hopfield Net and returns the most optimal result'
-        print "Initial fitness: ",self._model.fitness(self.pgd)
-        while (self.stop != True):
-            self.weight = self.inertiaWeight(self.G, self.Tmax)
+        # print "Initial fitness: ",self._model.fitness(self.pgd)
+        while (stop != True):
+            self.weight = self.inertiaWeight(G, self.Tmax)
             for i in range(self.numParticles):
                 if (self._model.fitness(self.x_new[i]) < self._model.fitness(self.pid[i])):
                     self.pid[i] = list(self.x_new[i])
                     # print v_new[i]
                     # swarmbest = self._model.fitness(x_new[i])
-                    print "new pid fitness: ", self._model.fitness(self.pid[i]), "particle: ", i
+                    # print "new pid fitness: ", self._model.fitness(self.pid[i]), "particle: ", i
                     if (self._model.fitness(self.pid[i]) < self._model.fitness(self.pgd)):
                         self.pgd = list(self.pid[i])
                         for j in range(len(self.pgd)):
                             self.pgd[j] = round(self.pgd[j])
-                        print "new pgd: ", self.pgd, " with fitness: ", self._model.fitness(self.pgd)
+                        # print "new pgd: ", self.pgd, " with fitness: ", self._model.fitness(self.pgd)
             # print pgd 
             if (self._model.fitness(self.pgd) == 0):
                 print "Result: ", self.pgd
                 print "fitness: ", self._model.fitness(self.pgd)
-                print "Generations: ", self.G
-                self.stop = True
+                print "Generations: ", G
+                stop = True
 
-            elif (self.G > self.Tmax-1):
+            elif (G > self.Tmax-1):
                 print "Result: ", self.pgd
                 print "fitness: ", self._model.fitness(self.pgd)
-                print "Generations: ", self.G
-                self.stop = True
+                print "Generations: ", G
+                stop = True
             
 
             else:
@@ -86,16 +89,16 @@ class ParticleSwarmOptimization(Seeker):
                         self.v_new[i][j] = self.velocity(self.x_prev[i][j], self.v_prev[i][j], self.pid[i][j], self.pgd[j], self.weight, r1, r2,c1=1.5,c2=2)
                         # print v_new[i][j]
                         self.x_new[i][j] = self.position(self.x_prev[i][j], self.v_new[i][j],high=self.N)
-                self.G = self.G + 1
+                G = G + 1
                 self.x_prev = list(self.x_new)
                 self.v_prev = list(self.v_new)
                 # print v_prev
-                if (self.G % 500 == 0):
+                if (G % 500 == 0):
 
-                    print "Generation: ", self.G, " fitness: ", self._model.fitness(self.pgd)
+                    print "Generation: ", G, " fitness: ", self._model.fitness(self.pgd)
                 
         self._model._space = self.pgd
-        return self._model.space.next()
+        return self._model._space
 
     @property
     def current(self):

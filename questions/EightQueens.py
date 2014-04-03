@@ -139,6 +139,18 @@ class ChessPiece(Model):
                 conflicts = conflicts + rdiag[i] - 1;
         return conflicts;
 
+    def to2D(self, A):
+        if (A is not None):
+            B = [[0 for x in xrange(len(A))] for x in xrange(len(A))] 
+
+            for i in range(len(A)):
+                if (A[i] != 0):
+                    B[i][A[i]-1] = 1
+            A = B
+        else:
+            A = None
+        return A
+
 class EightQueens(Question):
     """
     Implementation of the eight queens problem.  
@@ -163,12 +175,17 @@ class EightQueens(Question):
         warmth = 0
         if coordinates is None:
             warmth = 0
-        elif sum(coordinates) != sum(range(1,9)):
-            print "blah"
-            warmth = 0
-        else:
-            warmth = 1
-
+        elif isinstance(coordinates[0],list) != True:
+            if self.model.fitness(coordinates) != 0:
+                #print "blah"
+                warmth = 0
+            else:
+                warmth = 1
+        elif isinstance(coordinates[0],list) == True:
+            if self.fitness(self.to2D(coordinates)) != 0:
+                warmth = 0
+            else:
+                warmth = 1
 
         return warmth
 

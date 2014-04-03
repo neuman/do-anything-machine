@@ -13,6 +13,7 @@ def run(question, seeker, verbose=False):
     while go==True:
         try:
             tries +=1
+            # print tries
             current = seeker.next()
             if verbose:
                 print "checking "+str(current)
@@ -27,7 +28,7 @@ def run(question, seeker, verbose=False):
 
 q = EightQueens()
 
-# print q._model._space
+# print q._model._space 
 # run(q,Exhaustive)
 run(q,ParticleSwarmOptimization,True)
 
