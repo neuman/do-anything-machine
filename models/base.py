@@ -82,6 +82,7 @@ class Space(list):
             output.append(dimension.randomize())
         return Coordinates(space=self, initial=output)
 
+
     '''
     def map(self, coordinates):
         output = []
@@ -105,6 +106,8 @@ class Coordinates(list):
         super(Coordinates,self).__init__()
         self.extend(initial)
         self.space = space
+
+
 
     '''
     @property

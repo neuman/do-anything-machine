@@ -116,6 +116,29 @@ class ChessPiece(Model):
         # print U1,U2,U3,U4,U5
         return -(self.A*(U1+U2) + self.B*(U3 + U4) + self.C*(U5))
 
+    def fitness(self, particle):
+        horz = [0]*len(particle);
+        ldiag = [0]*(2*len(particle)-1);
+        rdiag = [0]*(2*len(particle)-1);
+        for i in range(len(particle)):
+            horz[int(round(particle[i]))-1] = horz[int(round(particle[i]))-1] + 1;
+            lint = i+1 + int(round(particle[i])) - 1
+            ldiag[lint-1] = ldiag[lint-1] + 1
+            rint = len(particle) - (i+1) + int(round(particle[i]))
+
+            rdiag[rint-1] = rdiag[rint-1] + 1
+
+        conflicts = 0;
+        for i in range(len(horz)):
+            if horz[i] > 1:
+                conflicts = conflicts + horz[i] - 1;
+        for i in range(len(ldiag)):
+            if ldiag[i] > 1:
+                conflicts = conflicts + ldiag[i] - 1;
+            if rdiag[i] > 1:
+                conflicts = conflicts + rdiag[i] - 1;
+        return conflicts;
+
 class EightQueens(Question):
     """
     Implementation of the eight queens problem.  
