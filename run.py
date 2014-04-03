@@ -2,6 +2,7 @@ from models import base as models
 from seekers.Exhaustive import Exhaustive
 from seekers.DiceRolling import DiceRolling
 from seekers.HopfieldNet import HopfieldNet
+from seekers.ParticleSwarm import ParticleSwarmOptimization
 from questions.EightQueens import EightQueens
 from questions.WhatsMyNumber import WhatsMyNumber
 
@@ -27,8 +28,8 @@ def run(question, seeker, verbose=False):
 q = EightQueens()
 
 # print q._model._space
-#run(q,Exhaustive)
-run(q,HopfieldNet,True)
+# run(q,Exhaustive)
+run(q,ParticleSwarmOptimization,True)
 
 
 
