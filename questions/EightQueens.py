@@ -186,6 +186,8 @@ class EightQueens(Question):
                 warmth = 0
             else:
                 warmth = 1
+        else:
+            warmth = None
 
         return warmth
 

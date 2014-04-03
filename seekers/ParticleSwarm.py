@@ -21,21 +21,15 @@ class ParticleSwarmOptimization(Seeker):
         """
         self._model._space = self._model.space.randomize()
         self.N = len(self._model._space)         # Number of Queens
-        self.numParticles = 150                  # Number of Particles in swarm
+        self.numParticles = 20                  # Number of Particles in swarm
         self.Tmax = 500                          # Max number of iterations  
-
-
-
-
-
-
-                
-        
 
     def __str__(self):
         return "Particle Swarm Optimization"
 
     def next(self):
+        'seeks the next coordinate in the space and returns it.  More accurately, trains the Hopfield Net and returns the most optimal result'
+        print "Using ", self.numParticles, " particles for particle Optimization"
         self.x_prev = [];
         self.x_new = [];
         self.f = [];
@@ -52,8 +46,7 @@ class ParticleSwarmOptimization(Seeker):
         self.v_new = [[0]*self.N]*self.numParticles
         stop = False
         G = 1
-        'seeks the next coordinate in the space and returns it.  More accurately, trains the Hopfield Net and returns the most optimal result'
-        # print "Initial fitness: ",self._model.fitness(self.pgd)
+
         while (stop != True):
             self.weight = self.inertiaWeight(G, self.Tmax)
             for i in range(self.numParticles):
@@ -68,19 +61,11 @@ class ParticleSwarmOptimization(Seeker):
                             self.pgd[j] = round(self.pgd[j])
                         # print "new pgd: ", self.pgd, " with fitness: ", self._model.fitness(self.pgd)
             # print pgd 
-            if (self._model.fitness(self.pgd) == 0):
+            if (self._model.fitness(self.pgd) == 0 or G > self.Tmax-1):
                 print "Result: ", self.pgd
                 print "fitness: ", self._model.fitness(self.pgd)
                 print "Generations: ", G
                 stop = True
-
-            elif (G > self.Tmax-1):
-                print "Result: ", self.pgd
-                print "fitness: ", self._model.fitness(self.pgd)
-                print "Generations: ", G
-                stop = True
-            
-
             else:
                 for i in range(self.numParticles):
                     for j in range(self.N):
@@ -93,11 +78,12 @@ class ParticleSwarmOptimization(Seeker):
                 self.x_prev = list(self.x_new)
                 self.v_prev = list(self.v_new)
                 # print v_prev
-                if (G % 500 == 0):
+                if (G % 100 == 0):
 
-                    print "Generation: ", G, " fitness: ", self._model.fitness(self.pgd)
+                    print "Generation: ", G, " fitness: ", self._model.fitness(self.pgd), " current best: ", self.pgd
                 
         self._model._space = self.pgd
+        self.numParticles = self.numParticles + 10
         return self._model._space
 
     @property
